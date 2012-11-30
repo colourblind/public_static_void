@@ -37,8 +37,12 @@ def slugify(name):
     name = name.replace('/', '')
     return name.replace(' ', '-')
     
+def format_datetime(value):
+    return value.strftime('%d/%m/%Y %H:%M')
+    
 def go(config): 
     env = jinja2.Environment(loader=jinja2.FileSystemLoader('.', encoding='utf-8'))
+    env.filters['datetime'] = format_datetime
     template = env.get_template(config['template'])
     if not os.path.exists(config['out_path']):
         os.makedirs(config['out_path'])
