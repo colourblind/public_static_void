@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>{{ data.Heading }} - Colourblind</title>
+    
+    <link rel="Stylesheet" type="text/css" href="http://monochromacy.net/Lib/Css/reset.css" />
+    <link rel="Stylesheet" type="text/css" href="http://monochromacy.net/Lib/Css/style.css" />
+    <link rel="Stylesheet" type="text/css" href="http://monochromacy.net/Skins/CBv2/Lib/Css/Style.css" />
+    <link rel="Stylesheet" type="text/css" href="http://monochromacy.net/Skins/CBv2/Lib/Css/Code.css" />
+</head>
+<body>
+<div id="Container">
+    
+    <div id="Left">
+        <div id="MainImage"></div>
+        <h1>
+        <a href="/">Colourblind</a>
+        </h1>
+        <p>
+        Welcome to Colourblind.
+        </p>
+        <p>
+        This is the personal web space of Tom Milsom. As much as possible everything is free
+        (as in speach and as in beer).
+        </p>
+
+<div id="Menu">
+    <ul>
+        <li><a href="/About.aspx">About</a></li>
+        <li><a href="/Projects.aspx">Projects</a>
+            <ul>
+                <li><a href="/Compares-Favourably.aspx">Compares Favourably</a></li>
+            </ul>
+        </li>
+    </ul>
+    <ul>
+        <li><a href="/Contact.aspx">Contact</a></li>
+    </ul>
+</div>
+
+        <br />
+        <p>
+        Make text: <a href="#" onclick="UpdateTextSize(-1); return false">Smaller</a> <a href="#" onclick="UpdateTextSize(1); return false">Bigger</a>
+        </p>
+    </div>
+    
+    <div id="PostContainer">
+        <div class="Post">
+        <h1>{{ data.Heading }}</h1>
+        <div class="Info"><strong>{{ data.DateCreated.strftime('%d/%m/%Y %H:%M:%S') }}</strong></div>
+<div class="Body">
+{{ data.Body }}
+</div>
+        </div>
+    </div>
+    
+    <br class="clear" />
+    
+    <div id="Footer">
+    <p>
+    Copyright Tom Milsom 2009-2011<br />
+    All content on this site is released under the<br />
+
+    <a href="http://creativecommons.org/licenses/by-nc/2.0/uk/">Creative Commons Attribution-Non-Commercial 2.0 UK: England and Wales</a><br />
+    unless otherwise stated.
+    </p>
+    </div>
+</div>
+</body>
+</html>

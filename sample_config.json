@@ -1,0 +1,5 @@
+{
+    "connection_string": "mssql+pyodbc://dbd:password@localhost\\sqlexpress/DieBlogDie",
+    "out_path": "test",
+    "template": "sample_template.html"
+}
