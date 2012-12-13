@@ -35,6 +35,7 @@ def slugify(name):
     name = name.replace('.', '')
     name = name.replace('\\', '')
     name = name.replace('/', '')
+    name = name.replace(':', '')
     return name.replace(' ', '-')
     
 def format_datetime(value):
