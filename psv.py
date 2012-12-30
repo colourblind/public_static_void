@@ -18,6 +18,8 @@ def slugify(name):
     name = name.replace('\\', '')
     name = name.replace('/', '')
     name = name.replace(':', '')
+    name = name.replace('\'', '')
+    name = name.replace('"', '')
     return name.replace(' ', '-')
     
 def format_datetime(value):
@@ -29,7 +31,8 @@ def go(config):
     template = env.get_template(config['template'])
     if not os.path.exists(config['out_path']):
         os.makedirs(config['out_path'])
-    data = feed_parser.rss_loader(config['connection_string'])
+    # TODO: pick loaders dynamically
+    data = feed_parser.dbd_loader(config['connection_string'])
     for row in data:
         markup = template.render(data=row)
         filename = '{0}/{1}.html'.format(config['out_path'], slugify(row.title))
