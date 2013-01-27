@@ -3,6 +3,7 @@ import os
 import json
 import jinja2
 import feed_parser
+import modifiers
 
 def load_config(path):
     config_file = open(path)
@@ -32,8 +33,9 @@ def go(config):
     if not os.path.exists(config['out_path']):
         os.makedirs(config['out_path'])
     # TODO: pick loaders dynamically
-    data = feed_parser.dbd_loader(config['connection_string'])
+    data = feed_parser.rss_loader(config['connection_string'])
     for row in data:
+        row.body = modifiers.tweak(row.body)
         markup = template.render(data=row)
         filename = '{0}/{1}.html'.format(config['out_path'], slugify(row.title))
         f = open(filename, 'w')
