@@ -21,6 +21,8 @@ def slugify(name):
     name = name.replace(':', '')
     name = name.replace('\'', '')
     name = name.replace('"', '')
+    name = name.replace('+', '')
+    name = name.replace('#', '')
     return name.replace(' ', '-')
     
 def format_datetime(value):
@@ -40,10 +42,9 @@ def go(config):
     # TODO: pick loaders dynamically
     data = feed_parser.rss_loader(config['connection_string'])
     for row in data:
-        row.body = modifiers.tweak(row.body)
+        #row.body = modifiers.tweak(row.body)
         markup = template.render(data=row)
         filename = '{0}/{1}.html'.format(config['out_path'], slugify(row.title))
-        print('<add from="/post/{0}.aspx" to="/{1}.html" />'.format(slugify(row.title).lower(), slugify(row.title)))
         f = open(filename, 'w')
         f.write(markup)
         f.close()
