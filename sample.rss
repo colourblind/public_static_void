@@ -1,0 +1,338 @@
+<rss version="2.0">
+  <channel>
+    <title>Colourblind</title>
+    <link>http://monochromacy.net</link>
+    <description>Version 3.0</description>
+    <copyright>Copyright Tom Milsom 2009-2013</copyright>
+    <generator>DieBlogDie</generator>
+    <item>
+      <title>Dynamic Section Numbers and Table of Contents with jQuery</title>
+      <link>http://monochromacy.net/Dynamic-Section-Numbers-and-Table-of-Contents-with-jQuery.html</link>
+      <description>&lt;p&gt;At work I'm thinking of moving our specs and other documentation over to HTML. We are, after all, well acquianted with the   Tubular Interwebs.&lt;/p&gt;
+&lt;p&gt;One of the things that I miss whenever it's not present in these kinds of docs are section numbers and a table of contents,   but maintaining them can be a pain in the arse. You add a new section and then all your subsequent sections needs to shuffle   down to accomodate it. What we need is the equivalent of BBC Basic's RENUMBER command, and I never thought I would say that ever again.&lt;/p&gt;
+&lt;p&gt;But why not generate it dynamically? We have the tools, and we have the talent. Also, we have jQuery.&lt;/p&gt;
+&lt;pre&gt;&lt;code data-language="javascript"&gt;function NumberHeadings(list, parent, prefix)
+{
+    if (list.length == 0)
+        return '';
+
+    var menu = '';
+    var level = parseInt(list[0].tagName.substr(1));
+    var index = 0;
+    
+    menu += '&amp;lt;ul&amp;gt;\n';
+    list.each(function() {
+            var current = $(this);
+
+            if (parent != '' &amp;amp;&amp;amp; current.prevAll('h' + (level - 1)).eq(0).html() != parent)
+                return '';
+            
+            var number = prefix  + (++ index) + '.';
+            var content = number + ' ' + current.html();
+            
+            current.html(content);
+            current.before('&amp;lt;a name="' + number + '"&amp;gt;&amp;lt;/a&amp;gt;');
+            menu += '&amp;lt;li&amp;gt;&amp;lt;a href="#' + number + '"&amp;gt;' + current.html() + '&amp;lt;/a&amp;gt;&amp;lt;/li&amp;gt;\n';
+            
+            menu += NumberHeadings(current.nextAll('h' + (level + 1)), content, number);
+        });
+    menu += '&amp;lt;/ul&amp;gt;\n';
+    
+    return menu;
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This function takes as it's input a list of h tags (h2, h3, whatever), the contents of its 'parent' heading tag and the   prefix of the numerical prefix of the new section. But you can safely ignore most of that. The easiest way to use it is like   this:&lt;/p&gt;
+&lt;pre&gt;&lt;code data-language="javascript"&gt;$(document).ready(function() {
+        $('#Menu').html(NumberHeadings($('h2'), '', ''));
+    });&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now as long as you make sure your headings use H tags and are nested correctly &lt;em&gt;like you should be doing anyway, you   slacker&lt;/em&gt; then that script will number all of your headings and provide a table of contents with anchor links to each   section. The only other caveat is that the prevAll function must return items in the reverse of the order that they appear in   the DOM (as it does currently) or things will break.&lt;/p&gt;
+&lt;p&gt;&lt;a href="/Resources/AutoToc.html"&gt;And here it is working.&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;In a largely irrelevant asside, I'm sure the first version of this that I wrote was neater, but since that version only   existed on my laptop, which I left on the train last week and has never been handed in, we'll never know. Also there's some   tossbag wandering around London with my laptop and, while I take some solace in the fact that it had Vista on it, I hope   their nipples drop off.&lt;/p&gt;</description>
+      <pubDate>Sun, 25 Oct 2009 16:18:48 GMT</pubDate>
+    </item>
+    <item>
+      <title>.NET Serialisation: Taking a snapshot of your object model</title>
+      <link>http://monochromacy.net/NET-Serialisation-Taking-a-snapshot-of-your-object-model.html</link>
+      <description>&lt;p&gt;The code for this weblog is my own, and while building it I decided I wanted the option to take all of the data and dump it in a manner which would make it easy to restore at a later date (mainly as means of backing up and for testing the installation process.) By this point you are probably already thinking &lt;a href="http://en.wikipedia.org/wiki/Serialization"&gt;'serialisation'&lt;/a&gt; - the process of flattening out your data for transmission or storage, and its sister: deserialisation - the process of converting this data back into an object.&lt;/p&gt;
+&lt;p&gt;As you would expect, .NET has plenty in place to help facilitate the process. Here are the basics.&lt;/p&gt;
+&lt;h3&gt;Serialising&lt;/h3&gt;
+&lt;p&gt;There are no boundaries to the format your objects are serialised into, but in ASP.NET two are typically used - XML and JSON. In this example I'll be using XML. To give you an idea of what it looks like, this:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="." src="/Resources/SerialisationClass.png" width="163" height="291" /&gt;&lt;/p&gt;
+&lt;p&gt;serialises to this:&lt;/p&gt;
+&lt;pre&gt;&lt;code data-language="c"&gt;&amp;lt;Comment&amp;gt;
+    &amp;lt;CommentId&amp;gt;6&amp;lt;/CommentId&amp;gt;
+    &amp;lt;PostId&amp;gt;13&amp;lt;/PostId&amp;gt;
+    &amp;lt;Active&amp;gt;true&amp;lt;/Active&amp;gt;
+    &amp;lt;Heading&amp;gt;Serialisation Test!&amp;lt;/Heading&amp;gt;
+    &amp;lt;Body&amp;gt;This is simply some test text.&amp;lt;/Body&amp;gt;
+    &amp;lt;Poster&amp;gt;Tom&amp;lt;/Poster&amp;gt;
+    &amp;lt;Email&amp;gt;spam@spam.com&amp;lt;/Email&amp;gt;
+    &amp;lt;Website&amp;gt;&amp;lt;/Website&amp;gt;
+    &amp;lt;IPAddress&amp;gt;::1&amp;lt;/IPAddress&amp;gt;
+    &amp;lt;DateCreated&amp;gt;2009-04-28T22:15:42.497&amp;lt;/DateCreated&amp;gt;
+&amp;lt;/Comment&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Before you can even think about serialising your object you need it to have:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;A public constructor that takes no arguments&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;And that's pretty much the only hard requirement. When serialised the &lt;em&gt;externally visible properties&lt;/em&gt; of the object are included, such as:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Public fields&lt;/li&gt;
+&lt;li&gt;Public properties with a getter and a setter&lt;/li&gt;
+&lt;li&gt;Enumerable properties, even if it doesn't have a setter, as long as its contained class is serialisable&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Also worth knowing is that you can explicitly state any properties you don't want to serialise using the attributes [XmlIgnore] (for XML serialising) and [ScriptIgnore] (for JSON), which live in the System.Xml.Serialization and System.Web.Script.Serialization namespaces respectively.&lt;/p&gt;
+&lt;p&gt;Once you've set up your classes you're good to go. If you have a myInstance of MyClass, you do the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code data-language="csharp"&gt;XmlWriter writer = null;
+try
+{
+    writer = XmlWriter.Create("dump.xml");
+    writer.WriteStartDocument();
+    XmlSerializer snapshotSerialiser = new XmlSerializer(typeof(MyClass));
+    snapshotSerialiser.Serialize(writer, myInstance);
+    writer.WriteEndDocument();
+}
+finally
+{
+    if (writer != null)
+        writer.Close();
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;Deserialising&lt;/h3&gt;
+&lt;p&gt;In theory, this is also the easy bit. .NET makes pretty sure that if you've serialised something, then you can deserialise it again. In practice, and as always, whether or not this process is actually easy depends on the details of your implementation. With that in mind, I'll cover that more in the next section.&lt;/p&gt;
+&lt;p&gt;The code you need to deserialise looks like a lot like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code data-language="javascript"&gt;XmlReader reader = XmlReader.Create("dump.xml");
+XmlSerializer serializer = new XmlSerializer(typeof(MyClass));
+MyClass myInstance = (MyClass)serializer.Deserialize(reader);
+reader.Close();&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;What can we do with it?&lt;/h3&gt;
+&lt;p&gt;Services are the obvious one. So obvious, in fact, that you don't even need to run this stuff explicitly. More useful is importing and exporting data from your object model.&lt;/p&gt;
+&lt;p&gt;Say I have an object model for a crappy weblog engine that looks something like this:&lt;/p&gt;
+&lt;p&gt;&lt;img alt="." src="/Resources/SerialisationObjectModel.png" width="547" height="241" /&gt;&lt;/p&gt;
+&lt;p&gt;We could then create an object whose sole purpose is to encapsulate your object model. Then you can simply serialise that object to get a snapshot of all the data in your system.&lt;/p&gt;
+&lt;pre&gt;&lt;code data-language="csharp"&gt;public class Snapshot
+{
+    public IEnumerable&amp;lt;Content&amp;gt; Contents
+    {
+        get;
+        set;
+    }
+    
+    public IEnumerable&amp;lt;User&amp;gt; Users
+    {
+        get;
+        set;
+    }
+    
+    public Snapshot()
+    {
+        this.Contents = Content.SelectAll();
+        this.Users = User.SelectAll();
+    }
+    
+    public void Restore()
+    {
+        foreach (Content content in this.Contents)
+            content.Restore();
+            
+        foreach (User user in this.Users)
+            user.Restore();
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The contents of the Restore method will obviously depend on how you persist your objects. In my case it's being saved to an SQL Server database. Since many of the primary keys are identities the IDs may well change once the objects are saved, so I need to account for this. Therefore the Restore method of each object saves the object itself, then saves all its child objects, while updating their referring IDs. The Restore method for the Post class looks like this, for example:&lt;/p&gt;
+&lt;pre&gt;&lt;code data-language="csharp"&gt;public void Restore()
+{
+    Save();
+    
+    foreach (Comment comment in this.Comments)
+    {
+        comment.PostId = this.PostId;
+        comment.Save();
+    }
+    
+    foreach (Tag tag in this.Tags)
+    {
+        tag.PostId = this.PostId;
+        tag.Save();
+    }
+    
+    Refresh();
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;So there you have it - using XML serialisation to save and load your object model. Any questions, corrections or observations, please leave a comment. Unless you're a spambot.&lt;/p&gt;</description>
+      <pubDate>Sun, 27 Sep 2009 18:55:39 GMT</pubDate>
+    </item>
+    <item>
+      <title>If an ASP.NET webservice errors in a forest and there is no-one around to hear it, does it make a sound?</title>
+      <link>http://monochromacy.net/If-an-ASPNET-webservice-errors-in-a-forest-and-there-is-no-one-around-to-hear-it-does-it-make-a-sound.html</link>
+      <description>&lt;p&gt;Apparently not.&lt;/p&gt;
+&lt;p&gt;Try it yourself. Hook Application.OnError and write a webservice that throws an error.&lt;/p&gt;
+&lt;p&gt;It's cool. I'll wait.&lt;/p&gt;
+&lt;p&gt;Back? Splendid.&lt;/p&gt;
+&lt;p&gt;This was fine when no-one did anything particularly important with AJAX. Your AJAX fails and the user has to type in the &lt;em&gt;whole&lt;/em&gt; address by themself? It's not ideal, but it shouldn't cause anyone to clear their basket in frustration and vow never to use the website again. However, if that same person now can't add anything to the basket then they don't have to clear their basket. You know, what with it already being empty and stuff.&lt;/p&gt;
+&lt;p&gt;Of course, &lt;a href="http://ayende.com/Blog/archive/2008/01/06/ASP.Net-Ajax-Error-Handling-and-WTF.aspx"&gt;other people&lt;/a&gt; have come across this charming idiosyncracy of .NET's web services, and it's pretty pitiful that however hard you shaft your application, as long as you do it inside a web service you'll never hear about it.&lt;/p&gt;
+&lt;p&gt;We've got a few options here as to how to proceed:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Storm the Bastille. Personally I'm all for a march on Redmond, but I realise that practical considerations may make this unfeasible.&lt;/li&gt;
+&lt;li&gt;Wrap every web service in a try catch block.&lt;/li&gt;
+&lt;li&gt;Check the response code on Request.End. We'll still lose the error, since GetLastError never gets filled.&lt;/li&gt;
+&lt;li&gt;Use a response filter, as laid out &lt;a href="http://stackoverflow.com/questions/475189/globally-log-exceptions-from-asp-net-scriptservice-services"&gt;here&lt;/a&gt; by Daniel Richardson. At least with this we can parse the the response and grab the stack trace directly out of it.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;If you have an existing error handling module then stuff this in. Failing that, putting it in Global.asax will work just as well.&lt;/p&gt;
+&lt;pre&gt;&lt;code data-language="csharp"&gt;public void Init(HttpApplication context)
+{
+    context.PostRequestHandlerExecute += new EventHandler(context_PostRequestHandlerExecute);
+}
+&amp;nbsp;
+void context_PostRequestHandlerExecute(object sender, EventArgs e)
+{
+    HttpContext context = HttpContext.Current;
+    if (context.Request.FilePath.Contains(".asmx") &amp;amp;&amp;amp; context.Response.StatusCode == 500)
+    {
+        Stream foo = context.Response.Filter;
+        if (context.Response.ContentType == "application/json")
+        {
+            context.Response.Filter = new JsonErrorResponseFilter(context.Response.OutputStream);
+        }
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The documentation can be found at the usual places, but what this does is places an event handler which catches the response on the way out, checks to see if the request is for a web service, if it's in JSON format (so we don't mess with any ye olde SOAP requests), and traps anything with with a 500 response code (or 'Server Error' to you and me).&lt;/p&gt;
+&lt;p&gt;Line 11 may raise some eyebrows, but there's is a method to the madness. There is a &lt;a href="http://www.romsteady.net/blog/2008/12/workaround-aspnet-response-filter-is.html"&gt;property lazy-loading fail&lt;/a&gt; in the HttpContext.Response.Filter property. It's one of those charming 'works fine when I debug it and step through but dies in it's arse every other time' bugs you encounter every now and then (hai2u Commerce Server!)&lt;/p&gt;
+&lt;p&gt;The ResponseFilter itself inherits from Stream and doesn't do a whole lot. Most of it is interface boilerplate.&lt;/p&gt;
+&lt;pre&gt;&lt;code data-language="csharp"&gt;class JsonErrorResponseFilter : Stream
+{
+    private Stream _responseStream = null;
+&amp;nbsp;
+    public JsonErrorResponseFilter(Stream responseStream)
+    {
+        _responseStream = responseStream;
+    }
+&amp;nbsp;
+    public override bool CanRead
+    {
+        get { return true; }
+    }
+&amp;nbsp;
+    public override bool CanSeek
+    {
+        get { return true; }
+    }
+&amp;nbsp;
+    public override bool CanWrite
+    {
+        get { return true; }
+    }
+&amp;nbsp;
+    public override void Flush()
+    {
+        _responseStream.Flush();
+    }
+&amp;nbsp;
+    public override long Length
+    {
+        get { return _responseStream.Length; }
+    }
+&amp;nbsp;
+    public override long Position
+    {
+        get { return _responseStream.Position; }
+        set { _responseStream.Position = value; }
+    }
+&amp;nbsp;
+    public override int Read(byte[] buffer, int offset, int count)
+    {
+        return _responseStream.Read(buffer, offset, count);
+    }
+&amp;nbsp;
+    public override long Seek(long offset, SeekOrigin origin)
+    {
+        return _responseStream.Seek(offset, origin);
+    }
+&amp;nbsp;
+    public override void SetLength(long value)
+    {
+        _responseStream.SetLength(value);
+    }
+&amp;nbsp;
+    public override void Write(byte[] buffer, int offset, int count)
+    {
+        string response = Encoding.UTF8.GetString(buffer, offset, count);
+&amp;nbsp;
+        JsonException error = new JsonException(response);
+        Colourblind.Core.Log.Instance.Write(error);
+&amp;nbsp;
+        _responseStream.Write(buffer, offset, count);
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Well, now we have a copy of the outgoing response it's up to us what we want to do with it. I chose to create a new exception and pass that to my logging code, but you can print it out on the nearest Laserjet or skywrite it if you want.&lt;/p&gt;
+&lt;p&gt;Super-shiny-turbo-tip: the JavaScriptSerializer is available for your parsing needs.&lt;/p&gt;
+&lt;pre&gt;&lt;code data-language="csharp"&gt;public class JsonException : Exception
+{
+    private string _stackTrace;
+    private string _message;
+&amp;nbsp;
+    public override string StackTrace
+    {
+        get { return _stackTrace; }
+    }
+&amp;nbsp;
+    public override string Message
+    {
+        get { return _message; }
+    }
+&amp;nbsp;
+    public JsonException(string json)
+    {
+        JavaScriptSerializer serialiser = new JavaScriptSerializer();
+        Dictionary&amp;lt;string, string&amp;gt; data = serialiser.Deserialize&amp;lt;Dictionary&amp;lt;string, string&amp;gt;&amp;gt;(json);
+&amp;nbsp;
+        _message = data["Message"];
+        _stackTrace = data["StackTrace"];
+        Data.Add("OriginalExceptionType", data["ExceptionType"]);
+    }
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I think that about covers everything. If anyone has a better way or any improvements to the code then please let me know. Although I'll probably claim your work as my own and then start plotting to kill so that my secret never comes to light. Just to warn you.&lt;/p&gt;
+&lt;p&gt;As an aside, if your web service is returning SOAP then you'll need another method. Best bet is probably to use a SOAP Extension to override the SOAP pipeline. As recommended &lt;a href="http://www.codinghorror.com/blog/archives/000054.html"&gt;here&lt;/a&gt; by that Atwood fellah and covered in more details &lt;a href="http://www.codeproject.com/KB/aspnet/ASPNETExceptionHandling.aspx"&gt;here&lt;/a&gt; (scroll down to 'Unhandled Exceptions in ASP.NET Web Services').&lt;/p&gt;</description>
+      <pubDate>Fri, 28 Aug 2009 21:38:19 GMT</pubDate>
+    </item>
+    <item>
+      <title>IE6 - Like that fungal infection you swore you'd gotten rid of this time</title>
+      <link>http://monochromacy.net/IE6---Like-that-fungal-infection-you-swore-youd-gotten-rid-of-this-time.html</link>
+      <description>&lt;p&gt;&lt;a href="http://news.bbc.co.uk/1/hi/technology/8196242.stm"&gt;Well, fuck&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;I honestly believe that IE6 retarded web development by 4 years and even today it is a constant battle trying to build sites to web standards that work on that hacky, fossilised heap of crap.&lt;/p&gt;
+&lt;p&gt;The blame seems to be on lazy IT departments and lame intranet app developers (loltroll), so if you see someone from either of those camps in the street, kick them in the balls once from me and &lt;em&gt;everyone else on the Internet&lt;/em&gt;.&lt;/p&gt;</description>
+      <pubDate>Fri, 14 Aug 2009 10:03:01 GMT</pubDate>
+    </item>
+    <item>
+      <title>The HTML 5 Canvas - Good Clean Fun</title>
+      <link>http://monochromacy.net/The-HTML-5-Canvas---Good-Clean-Fun.html</link>
+      <description>&lt;p&gt;So the plan was it open this weblog with a deep and illuminating post. Something .NETty and architectural in nature. But then I got distracted by &lt;a href="http://www.w3.org/TR/html5/the-canvas-element.html#the-canvas-element"&gt;shiny things&lt;/a&gt; and so instead I bring you something completely different: &lt;em&gt;silly baubles&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;The &amp;lt;canvas&amp;gt; element is introduced in HTML 5 and has a very simple premise: it gives you a surface you can draw to on the client side using Javascript. Slinging one of these into your HTML is easy enough.&lt;/p&gt;
+&lt;pre&gt;&lt;code data-language="javascript"&gt;&amp;lt;canvas id="MainCanvas" width="300" height="300" /&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;But of course the fun really starts outside the markup, where the wild things are.&lt;/p&gt;
+&lt;pre&gt;&lt;code data-language="javascript"&gt;var context = canvas.getContext('2d');&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The canvas object is the access to the canvas element in the DOM, and does little else beyond exposing the attributes of the canvas tag. The fun really starts when you get your grubby little mits on the context. You get some simple vector drawing functions, allowing you to draw lines, rectangles, arcs, and bezier curves if you're nasty, along with a series of fill options such as gradient and patterns. I'll not go into the details because I can't be bothered and you can just look it up &lt;a href="http://blog.nihilogic.dk/2009/02/html5-canvas-cheat-sheet.html"&gt;here&lt;/a&gt;. Time for shinys!&lt;/p&gt;
+&lt;h3&gt;Balls . . . heh heh&lt;/h3&gt;
+&lt;p&gt;&lt;a href="/Resources/collision.html" alt="Collision detection and response"&gt;&lt;img src="/Resources/collision.png" /&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;I love particle systems to an almost unhealthy degree so here's a load of bouncing balls. I was going to make this a lot more involved in terms of using the features of canvas, but then I got distracted by mechanics and took a sharp left at the junction of Newton and Collision Response and ended up in the bad side of town where the physicists hang out. Dang.&lt;/p&gt;
+&lt;p&gt;So yeah, not a lot to be said for this one. It's mostly badly faked collision model and you could actually do this in non-canvas, venerable DHTML really easily. This one is mostly an exercise in how to set up the animation using setInterval and the like.&lt;/p&gt;
+&lt;p&gt;The only real thing of some note in here is some cheap motion blur. Rather than clear the frame every time I'm simply drawing over the entire canvas with a rectangle that's the same colour as the background but with a low alpha (or opacity, if that terminology seems more familiar to you.) This will work fine unless you're using the draw order to depth-cue your objects (if you need an object to look like it's 'behind' another by drawing the further object before the nearer one).&lt;/p&gt;
+&lt;p&gt;&lt;a href="/Resources/subdivision.html" alt="Pattern generation and animation using a second canvas"&gt;&lt;img src="/Resources/subdivision.png" width="380" height="200" /&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;This second one is a lot more feature-filled, since it touches on transformations and the transformation stack and patterns and multiple canvas and alpha blending and stuff.&lt;/p&gt;
+&lt;p&gt;First the blocky image is drawn into a canvas, and a pattern is created from it. This can then be passed into the fillStyle property of the context and will be tiled across any filled object you want to render. In this case a BIG DAMN SQUARE, because I'm interesting like that.&lt;/p&gt;
+&lt;p&gt;Also on this one you can see an example of transformations. The transformation are cumulative &lt;em&gt;and non-associative&lt;/em&gt; - so a rotation of X followed by a translation of Y is not the same as a translation of Y followed by a rotation of X. A transformation stack is available and the concept will be familiar to anyone whose has used a graphics API in the past. If you can't see a use for one then I wouldn't sweat it at the moment. Suffice to say that the stack allows you to save the current set of transformations, and retrieve them again to roll the transformation back to a previous state.&lt;/p&gt;
+&lt;h3&gt;So what?&lt;/h3&gt;
+&lt;p&gt;It's a valid question.&lt;/p&gt;
+&lt;p&gt;Canvas is interesting stuff, but one thing it's not is a 'Flash killer'. Flash's strength lies in its animations and its vector drawing, whereas canvas will only give you the most primitive of primitives. (it's got support for the Javascript Image object, but that's hardly the same thing.) Oh, at some point some crazy awesome loon with too much time on their hands will create some magical things with it - because we're geeks and we're &lt;a href="telnet://towel.blinkenlights.nl"&gt;prone to do crap like that&lt;/a&gt;, but it's a poor fit for any real drawing or animation work. Odd little games are fun and all but it's always a shame to have something this slick and not have an excuse to use it at work. Maybe I'm being horrifically myopic (it wouldn't be the first time,) but I am struggling to think of practical things to do with it besides dynamic graphs. It's a Monday though, and I've had no bourbon, so I'm not feeling too creative.&lt;/p&gt;
+&lt;p&gt;But there could well be more - the astute among you will have noticed that we're passing an argument to the getContext call. The fact that you have to ask for '2d' now implies that '3d' may be available later. It's not part of the spec, but that hasn't stopped people running with it. Firefox currently has an &lt;a href="https://addons.mozilla.org/en-US/firefox/addon/7171"&gt;extension&lt;/a&gt; that ties to OpenGL ES 2.0 (shaders and everything!) and Opera has included their own take on the 3D canvas &lt;a href="http://my.opera.com/timjoh/blog/2007/11/13/taking-the-canvas-to-another-dimension"&gt;natively&lt;/a&gt;. Could well be an interesting time for browser games in the next couple of years.&lt;/p&gt;
+&lt;p&gt;Finally, if you want to see some genuinely dazzling work in this realm, one doyen I was introduced to on my travels is &lt;a href="http://www.p01.org/"&gt;Mathieu 'P01' Henri&lt;/a&gt;, who can make Javascript dance like Fred Astaire on a hot plate. You should really do yourself a favour and &lt;a href="http://www.p01.org/releases/20_lines_hypno_trip_down_the_fractal_rug/"&gt;have a look&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Generic arse-covering: The code itself is probably not great. I know enough Javascript to get by but have no idea, for example, how much overhead is associated with creating objects via literal notation inside a loop. Also some of it is just plain, common-or-garden laziness. There's no checks for divide-by-zeros and there's bound to be other things I haven't tested thoroughly. It illustrates the point though. As always, &lt;a href="/ContentPage.aspx?ContentId=2"&gt;use at your own risk&lt;/a&gt; and don't treat is the paragon of Javascript or anything.&lt;/em&gt;&lt;a href="/Resources/collision.html" alt="Collision detection and response"&gt;&lt;br /&gt;&lt;/a&gt;&lt;/p&gt;</description>
+      <pubDate>Tue, 11 Aug 2009 20:25:55 GMT</pubDate>
+    </item>
+    <item>
+      <title>Oh hai!</title>
+      <link>http://monochromacy.net/Oh-hai.html</link>
+      <description>&lt;p&gt;&lt;img title="Oh hai" src="/Resources/using_the_internet.jpg" /&gt;&lt;/p&gt;
+&lt;p&gt;This weblog will be largely concerned with ASP.NET, C# and Javascript, but there will be occasional ridiculous tangents into whatever captures my imagination long enough for me to write it down.&lt;/p&gt;
+&lt;p&gt;You have been warned.&lt;/p&gt;</description>
+      <pubDate>Sun, 26 Jul 2009 17:10:03 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

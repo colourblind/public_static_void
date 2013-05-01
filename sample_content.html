@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ data.title }} - Colourblind v3</title>
+    <link rel="stylesheet" type="text/css" href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,400,700'>
+    <link rel="stylesheet" type="text/css" href="/lib/css/cbv3.css">
+    <link rel="stylesheet" type="text/css" href="/lib/css/rainbow.css">
+</head>
+<body>
+
+<article>
+<div>
+
+<h1>{{ data.title }}</h1>
+<p class="details">
+Posted by <strong>Tom</strong> on <strong>{{ data.created_date|datetime }}</strong>
+</p>
+
+{{ data.body }}
+    
+</div>
+</article>
+
+<nav class="main">
+    <div>
+        <span class="header">Colourblind</span>
+        <ul>
+            <li><a href="/">home</a></li>
+            <li><a href="https://github.com/colourblind">github</a></li>
+        </ul>
+        <a href="http://creativecommons.org/licenses/by-nc/2.0/uk/deed.en_GB" rel="license" class="license">
+        <img src="http://i.creativecommons.org/l/by-nc/2.0/uk/80x15.png" style="border-width:0" alt="Creative Commons Licence">
+        </a>
+        <span class="copyright">&copy; Tom Milsom 2009-2013</span>
+    </div>
+</nav>
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript" src="/lib/javascript/rainbow-custom.min.js"></script>
+<script type="text/javascript" src="/lib/javascript/cbv3.js"></script>
+
+</body>
+</html>
